@@ -27,6 +27,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.SearchIndexableResource;
 import android.provider.Settings.Global;
@@ -57,6 +58,8 @@ public class OtherSoundSettings extends SettingsPreferenceFragment implements In
     private static final int DOCK_AUDIO_MEDIA_DISABLED = 0;
     private static final int DOCK_AUDIO_MEDIA_ENABLED = 1;
     private static final int DEFAULT_DOCK_AUDIO_MEDIA = DOCK_AUDIO_MEDIA_DISABLED;
+    
+    private static final int DLG_CAMERA_SOUND = 1;
 
     private static final String KEY_DIAL_PAD_TONES = "dial_pad_tones";
     private static final String KEY_SCREEN_LOCKING_SOUNDS = "screen_locking_sounds";
@@ -67,7 +70,11 @@ public class OtherSoundSettings extends SettingsPreferenceFragment implements In
     private static final String KEY_DOCK_AUDIO_MEDIA = "dock_audio_media";
     private static final String KEY_EMERGENCY_TONE = "emergency_tone";
     private static final String KEY_VOLUME_ADJUST_SOUND = "volume_adjust_sound";
+    private static final String KEY_CAMERA_SOUNDS = "camera_sounds";
+    private static final String PROP_CAMERA_SOUND = "persist.sys.camera-sound";
     private static final String KEY_SCREENSHOT_SHUTTER_SOUND = "screenshot_shutter_sound";
+    
+    private SwitchPreference mCameraSounds;
 
     private static final SettingPref PREF_DIAL_PAD_TONES = new SettingPref(
             TYPE_SYSTEM, KEY_DIAL_PAD_TONES, System.DTMF_TONE_WHEN_DIALING, DEFAULT_ON) {
@@ -202,6 +209,9 @@ public class OtherSoundSettings extends SettingsPreferenceFragment implements In
         for (SettingPref pref : PREFS) {
             pref.init(this);
         }
+        mCameraSounds = (SwitchPreference) findPreference(KEY_CAMERA_SOUNDS);
+        mCameraSounds.setChecked(SystemProperties.getBoolean(PROP_CAMERA_SOUND, true));
+        mCameraSounds.setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -243,6 +253,17 @@ public class OtherSoundSettings extends SettingsPreferenceFragment implements In
             }
         }
 
+        public boolean onPreferenceChange(Preference preference, Object objValue) {
+            final String key = preference.getKey();
+            if (KEY_CAMERA_SOUNDS.equals(key)) {
+                if ((Boolean) objValue) {
+                    SystemProperties.set(PROP_CAMERA_SOUND, "1");
+                } else {
+                    showDialogInner(DLG_CAMERA_SOUND);
+                }
+            }
+        }
+        
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);

@@ -63,6 +63,13 @@
             android:switchTextOn=""
             android:persistent="false" />
 
+   <!-- Camera shutter adjust sound -->
+    <SwitchPreference
+        android:key="camera_sounds"
+        android:title="@string/camera_sounds_title"
+        android:summary="@string/camera_sounds_summary"
+        android:defaultValue="true" />
+
     <!-- Shutter adjust sound -->
     <SwitchPreference
             android:key="screenshot_shutter_sound"
